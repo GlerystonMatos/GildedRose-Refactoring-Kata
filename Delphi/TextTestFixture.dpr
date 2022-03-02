@@ -1,14 +1,13 @@
 program TextTestFixture;
 
 {$APPTYPE CONSOLE}
-
 {$R *.res}
 
 uses
   System.SysUtils,
+  Item in 'Item.pas',
   System.Generics.Collections,
-  GildedRose in 'GildedRose.pas',
-  Item in 'Item.pas';
+  GildedRose in 'GildedRose.pas';
 
 var
   Days, ErrorCode, I, J: Integer;

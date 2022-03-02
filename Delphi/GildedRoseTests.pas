@@ -1,6 +1,7 @@
 unit GildedRoseTests;
 
 interface
+
 uses
   DUnitX.TestFramework,
   GildedRose,
@@ -28,9 +29,10 @@ begin
 
   LGildedRose.UpdateQuality;
 
-  Assert.AreEqual('fixme', LGildedRose.Items[0].Name);
+  Assert.AreEqual('foo', LGildedRose.Items[0].Name);
 end;
 
 initialization
   TDUnitX.RegisterTestFixture(TGildedRoseTests);
+
 end.

@@ -10,9 +10,16 @@ type
   TGildedRose = class(TObject)
   private
     FItems: TObjectList<TItem>;
+    procedure AtualizarItem(const AItem: TItem);
+    procedure AtualizarSellIn(const AItem: TItem);
+    procedure AtualizarQualidade(const AItem: TItem);
+    procedure IncrementarQualidade(const AItem: TItem);
+    procedure DecrementarQualidade(const AItem: TItem);
+    procedure AumentarQualidadeComTempo(const AItem: TItem);
+    procedure AtualizarQualidadeItensVencidos(const AItem: TItem);
   public
     constructor Create(const AItems: TObjectList<TItem>);
-    procedure UpdateQuality;
+    procedure UpdateItem;
     property Items: TObjectList<TItem> read FItems;
   end;
 
@@ -26,81 +33,74 @@ begin
   FItems := AItems;
 end;
 
-procedure TGildedRose.UpdateQuality;
+procedure TGildedRose.UpdateItem;
 var
-  I: Integer;
+  Indice: Integer;
 begin
-  for I := 0 to Items.Count - 1 do
+  for Indice := 0 to Pred(Items.Count) do
+    AtualizarItem(Items[Indice]);
+end;
+
+procedure TGildedRose.AtualizarItem(const AItem: TItem);
+begin
+  AtualizarQualidade(AItem);
+  AtualizarSellIn(AItem);
+  AtualizarQualidadeItensVencidos(AItem);
+end;
+
+procedure TGildedRose.AtualizarQualidade(const AItem: TItem);
+begin
+  if (AItem.NaoAumentaQualidadeComTempo) then
+    DecrementarQualidade(AItem)
+  else
+    AumentarQualidadeComTempo(AItem);
+end;
+
+procedure TGildedRose.AtualizarSellIn(const AItem: TItem);
+begin
+  if (not AItem.IsLendario) then
+    AItem.DecrementarSellIn;
+end;
+
+procedure TGildedRose.AtualizarQualidadeItensVencidos(const AItem: TItem);
+begin
+  if (AItem.NaoPossuiValidade) then
   begin
-    if (Items[I].Name <> 'Aged Brie') and (Items[I].Name <> 'Backstage passes to a TAFKAL80ETC concert') then
+    if (not AItem.IsAgedBrie) then
     begin
-      if Items[I].Quality > 0 then
-      begin
-        if Items[I].Name <> 'Sulfuras, Hand of Ragnaros' then
-        begin
-          Items[I].Quality := Items[I].Quality - 1;
-        end;
-      end;
+      if (not AItem.IsBackstagePasses) then
+        DecrementarQualidade(AItem)
+      else
+        AItem.ZerarQualidade;
     end
     else
-    begin
-      if Items[I].Quality < 50 then
-      begin
-        Items[I].Quality := Items[I].Quality + 1;
-        if Items[I].Name = 'Backstage passes to a TAFKAL80ETC concert' then
-        begin
-          if Items[I].SellIn < 11 then
-          begin
-            if Items[I].Quality < 50 then
-            begin
-              Items[I].Quality := Items[I].Quality + 1;
-            end;
-          end;
-
-          if Items[I].SellIn < 6 then
-          begin
-            if Items[I].Quality < 50 then
-            begin
-              Items[I].Quality := Items[I].Quality + 1;
-            end;
-          end;
-        end;
-      end;
-    end;
-
-    if Items[I].Name <> 'Sulfuras, Hand of Ragnaros' then
-    begin
-      Items[I].SellIn := Items[I].SellIn - 1;
-    end;
-
-    if Items[I].SellIn < 0 then
-    begin
-      if Items[I].Name <> 'Aged Brie' then
-      begin
-        if Items[I].Name <> 'Backstage passes to a TAFKAL80ETC concert' then
-        begin
-          if Items[I].Quality > 0 then
-          begin
-            if Items[I].Name <> 'Sulfuras, Hand of Ragnaros' then
-            begin
-              Items[I].Quality := Items[I].Quality - 1;
-            end;
-          end;
-        end
-        else
-        begin
-          Items[I].Quality := Items[I].Quality - Items[I].Quality;
-        end;
-      end
-      else
-      begin
-        if Items[I].Quality < 50 then
-        begin
-          Items[I].Quality := Items[I].Quality + 1;
-        end;
-      end;
-    end;
+      IncrementarQualidade(AItem);
   end;
+end;
+
+procedure TGildedRose.DecrementarQualidade(const AItem: TItem);
+begin
+  if ((AItem.PossuiQualidade) and (not AItem.IsLendario)) then
+    AItem.DecrementarQualidade;
+end;
+
+procedure TGildedRose.AumentarQualidadeComTempo(const AItem: TItem);
+begin
+  IncrementarQualidade(AItem);
+  if (AItem.IsBackstagePasses) then
+  begin
+    if (AItem.SellIn < 11) then
+      IncrementarQualidade(AItem);
+
+    if (AItem.SellIn < 6) then
+      IncrementarQualidade(AItem);
+  end;
+end;
+
+procedure TGildedRose.IncrementarQualidade(const AItem: TItem);
+begin
+  if (AItem.NaoAtingiuQualidadeMaxima) then
+    AItem.IncrementarQualidade;
 end;
 
 end.
